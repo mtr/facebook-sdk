@@ -291,7 +291,8 @@ class GraphAPI(object):
                 'client_id': app_id,
                 'client_secret': app_secret}
 
-        return self.request("oauth/access_token", args=args)["access_token"]
+        return self.request(self.version + "/oauth/access_token",
+                            args=args)["access_token"]
 
     def get_access_token_from_code(
             self, code, redirect_uri, app_id, app_secret):
@@ -305,9 +306,10 @@ class GraphAPI(object):
             "code": code,
             "redirect_uri": redirect_uri,
             "client_id": app_id,
-            "client_secret": app_secret}
+            "client_secret": app_secret
+        }
 
-        return self.request("oauth/access_token", args)
+        return self.request(self.version + "/oauth/access_token", args)
 
     def extend_access_token(self, app_id, app_secret):
         """
@@ -375,11 +377,8 @@ def get_user_from_cookie(cookies, app_id, app_secret):
     parsed_request = parse_signed_request(cookie, app_secret)
     if not parsed_request:
         return None
-    try:
-        result = get_access_token_from_code(parsed_request["code"], "",
-                                            app_id, app_secret)
-    except GraphAPIError:
-        return None
+    result = get_access_token_from_code(parsed_request["code"], "",
+                                        app_id, app_secret)
     result["uid"] = parsed_request["user_id"]
     return result
 
@@ -427,7 +426,7 @@ def parse_signed_request(signed_request, app_secret):
 
 
 def auth_url(app_id, canvas_url, perms=None, **kwargs):
-    url = "https://www.facebook.com/dialog/oauth?"
+    url = "https://www.facebook.com/v2.0/dialog/oauth?"
     kvps = {'client_id': app_id, 'redirect_uri': canvas_url}
     if perms:
         kvps['scope'] = ",".join(perms)
